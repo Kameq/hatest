@@ -3,33 +3,48 @@ import { Link } from 'react-router-dom';
 
 function MainView() {
   useEffect(() => {
-    fetchData();
+    fetchTopStories();
   }, []);
 
   const [stories, setStories] = useState([]);
 
-  const dataUrl = 'https://hacker-news.firebaseio.com/v0/topstories.json'
+  const mainUrl = 'https://hacker-news.firebaseio.com/v0/';
 
-  const fetchData = async () => 
+  const fetchTopStories = async () => 
     {
-    const data = await fetch(dataUrl);
-    const dataJson = await data.json();
-    const randomIds = getRandomIds(dataJson, 10);
-    setStories(randomIds);
+    const topStoriesIdsUrl = 'topstories.json';
+    const data = await fetch(mainUrl + topStoriesIdsUrl).then(r => r.json());
+    const randomIds = getRandomIds(data, 10);
+    const stories = await prepareStories(randomIds);
+    setStories(stories);
+    }
+
+  const fetchStoryById = async (aId) => 
+    {
+    const storyIdUrl = `item/${aId}.json`;
+    const story = await fetch(mainUrl + storyIdUrl).then(r => r.json());
+    return story;
+    }
+
+  const fetchUserKarma = async (aName) => 
+    {
+    const userNameUrl = `user/${aName}.json`;
+    const user = await fetch(mainUrl + userNameUrl).then(r => r.json());
+    return user.karma;
     }
 
   function getRandomIds(aArray, aNumber)
     {
-    var result = new Array(aNumber),
+    let result = new Array(aNumber),
         len = aArray.length,
         taken = new Array(len);
 
     if (aNumber > len)
-      throw new RangeError("getRandom: more elements taken than available");
+      throw new RangeError("getRandomIds: more elements taken than available");
 
     while (aNumber--) 
       {
-      var x = Math.floor(Math.random() * len);
+      let x = Math.floor(Math.random() * len);
       result[aNumber] = aArray[x in taken ? taken[x] : x];
       taken[x] = --len in taken ? taken[len] : len;
       }
@@ -37,15 +52,35 @@ function MainView() {
     return result;
     }
 
+   async function prepareStories(aStoriesIds)
+    {
+    let storiesData = [];
+
+    for (let i = 0; i < aStoriesIds.length; i++)
+      {
+      let story = await fetchStoryById(aStoriesIds[i]);
+      story.karma = await fetchUserKarma(story.by);
+      storiesData.push(story);
+      }
+
+    return storiesData;
+    }
+
   return (
     <div className="MainView">
       <h1>Main</h1>
       {stories.map(story => (
-        <h1 key={story} >
-          <Link to={`/details/${story}`}>
-            {story}
+        <div key={story.id} >
+          <Link to={`/details/${story.id}`}>
+            <h1 >
+              {story.title}
+            </h1>
+            <span>Author: {story.by}</span><br />
+            <span>Score: {story.score}</span><br />
+            <span>Date: {Date(story.time)}</span><br />
+            <span>Karma: {story.karma}</span>
           </Link>
-        </h1>
+        </div>
       ))}
     </div>
   );
