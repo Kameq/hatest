@@ -14,17 +14,32 @@ function MainView() {
     {
     const data = await fetch(dataUrl);
     const dataJson = await data.json();
+    const randomIds = getRandomIds(dataJson, 10);
+    setStories(randomIds);
+    }
 
-    setStories(dataJson);
-    // console.log(dataJson);
+  function getRandomIds(aArray, aNumber)
+    {
+    var result = new Array(aNumber),
+        len = aArray.length,
+        taken = new Array(len);
+
+    if (aNumber > len)
+      throw new RangeError("getRandom: more elements taken than available");
+
+    while (aNumber--) 
+      {
+      var x = Math.floor(Math.random() * len);
+      result[aNumber] = aArray[x in taken ? taken[x] : x];
+      taken[x] = --len in taken ? taken[len] : len;
+      }
+
+    return result;
     }
 
   return (
     <div className="MainView">
       <h1>Main</h1>
-      <Link to="/details">
-        <span>Details View</span>
-      </Link>
       {stories.map(story => (
         <h1 key={story} >
           <Link to={`/details/${story}`}>
