@@ -26,7 +26,11 @@ function MainView() {
         <span>Details View</span>
       </Link>
       {stories.map(story => (
-        <h1 key={story} >{story}</h1>
+        <h1 key={story} >
+          <Link to={`/details/${story}`}>
+            {story}
+          </Link>
+        </h1>
       ))}
     </div>
   );

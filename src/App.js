@@ -7,15 +7,14 @@ import DetailsView from './Views/DetailsView';
 
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
-
 function App() {
   return (
     <Router>
       <div className="App">
         <Switch>
           <Route path="/" exact component={MainView} />
-          <Route path="/details" component={DetailsView} />
           <Route path="/chart" component={ChartView} />
+          <Route path="/details/:id" component={DetailsView} />
         </Switch>
       </div>
     </Router>
