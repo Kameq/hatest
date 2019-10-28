@@ -1,7 +1,5 @@
 const storiesListReducer = (state = [], action) => 
   {
-  console.log(action.payload);
-  console.log(action.type);
   switch(action.type)
     {
     case 'RELOAD':

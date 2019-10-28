@@ -5,12 +5,8 @@ import { reload } from '../actions';
 
 function MainView() {
   useEffect(() => {
-    // fetchTopStories();
-    // dispatch(reload());
     start();
   }, []);
-
-  // const [stories, dispatch] = React.useReducer(storiesListReducer, []);
 
   const mainUrl = 'https://hacker-news.firebaseio.com/v0/';
   const stories = useSelector(state => state.storiesList);
