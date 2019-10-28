@@ -1,14 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { reload } from '../actions';
 
 function MainView() {
   useEffect(() => {
-    fetchTopStories();
+    // fetchTopStories();
+    // dispatch(reload());
+    start();
   }, []);
 
-  const [stories, setStories] = useState([]);
+  // const [stories, dispatch] = React.useReducer(storiesListReducer, []);
 
   const mainUrl = 'https://hacker-news.firebaseio.com/v0/';
+  const stories = useSelector(state => state.storiesList);
+  const dispatch = useDispatch();
+
+  const start = () =>
+    {
+    fetchTopStories()
+      .then(results => dispatch(reload(results)))
+      .then(re => {console.log('stories: ', re);});
+    }
 
   const fetchTopStories = async () => 
     {
@@ -16,7 +29,8 @@ function MainView() {
     const data = await fetch(mainUrl + topStoriesIdsUrl).then(r => r.json());
     const randomIds = getRandomIds(data, 10);
     const stories = await prepareStories(randomIds);
-    setStories(stories);
+
+    return stories;
     }
 
   const fetchStoryById = async (aId) => 
@@ -56,6 +70,7 @@ function MainView() {
     {
     let storiesData = [];
 
+    // How to do it whit foreach when its async ?
     for (let i = 0; i < aStoriesIds.length; i++)
       {
       let story = await fetchStoryById(aStoriesIds[i]);
@@ -72,9 +87,7 @@ function MainView() {
       {stories.map(story => (
         <div key={story.id} >
           <Link to={`/details/${story.id}`}>
-            <h1 >
-              {story.title}
-            </h1>
+            <h3>{story.title}</h3>
             <span>Author: {story.by}</span><br />
             <span>Score: {story.score}</span><br />
             <span>Date: {Date(story.time)}</span><br />
