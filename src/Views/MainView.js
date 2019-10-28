@@ -62,7 +62,7 @@ function MainView() {
     return result;
     }
 
-   async function prepareStories(aStoriesIds)
+  async function prepareStories(aStoriesIds)
     {
     let storiesData = [];
 
@@ -80,6 +80,7 @@ function MainView() {
   return (
     <div className="MainView">
       <h1>Main</h1>
+      <button onClick={()=>{fetchTopStories().then(results => dispatch(reload(results)))}}>RELOAD STORIES</button>
       {stories.map(story => (
         <div key={story.id} >
           <Link to={`/details/${story.id}`}>
