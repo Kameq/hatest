@@ -12,11 +12,14 @@ function MainView() {
   const stories = useSelector(state => state.storiesList);
   const dispatch = useDispatch();
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const start = () =>
     {
+    setIsLoading(true);
     fetchTopStories()
       .then(results => dispatch(reload(results)))
-      .then(re => {console.log('stories: ', re);});
+      .then(()=>{setIsLoading(false)});
     }
 
   const fetchTopStories = async () => 
@@ -80,8 +83,9 @@ function MainView() {
   return (
     <div className="MainView">
       <h1>Main</h1>
-      <button onClick={()=>{fetchTopStories().then(results => dispatch(reload(results)))}}>RELOAD STORIES</button>
-      {stories.map(story => (
+      <button onClick={()=>{start()}}>RELOAD STORIES</button>
+      {!isLoading ?
+        stories.map(story => (
         <div key={story.id} >
           <Link to={`/details/${story.id}`}>
             <h3>{story.title}</h3>
@@ -91,7 +95,7 @@ function MainView() {
             <span>Karma: {story.karma}</span>
           </Link>
         </div>
-      ))}
+      )) : <h3>Loading please wait ...</h3>}
     </div>
   );
 }
