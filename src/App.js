@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 
 import ChartView from './Views/ChartView';
@@ -7,7 +7,19 @@ import DetailsView from './Views/DetailsView';
 
 import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
+import { useDispatch } from 'react-redux';
+import { relodRequested } from './actions';
+
 function App() {
+  useEffect(() => {
+    onStart();
+  }, []);
+
+  const dispatch = useDispatch();
+  const onStart = () => {
+    dispatch(relodRequested());
+    }
+
   return (
     <Router>
       <div className="App">
