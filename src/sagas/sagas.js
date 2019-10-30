@@ -1,5 +1,6 @@
 import * as actions from '../actions/';
 import { call, put, takeEvery } from 'redux-saga/effects'
+import * as moment from 'moment';
 
 export function* getData()
   {
@@ -7,6 +8,11 @@ export function* getData()
     {
     const response = yield call(fetchTopStories);
     yield put(actions.reloadSucces(response));
+    
+    const scoresSorted = response.map(el => el.score);
+    const chartData = randomizeStories(scoresSorted);
+
+    yield put(actions.setChartData(chartData));
     }
   catch (e) 
     {
@@ -73,8 +79,28 @@ async function prepareStories(aStoriesIds)
     {
     let story = await fetchStoryById(aStoriesIds[i]);
     story.karma = await fetchUserKarma(story.by);
+
+    const time = moment(Date(story.time)).format('DD-MM-YYYY HH:mm:ss');
+    story.time = time;
     storiesData.push(story);
     }
 
+  storiesData.sort((a,b)=>{return b.score - a.score});
+
   return storiesData;
+  }
+
+function randomizeStories(aStories)
+  {
+  let j, x, i;
+
+  for (i = aStories.length - 1; i > 0; i--)
+    {
+    j = Math.floor(Math.random() * (i + 1));
+    x = aStories[i];
+    aStories[i] = aStories[j];
+    aStories[j] = x;
+    }
+
+  return aStories;
   }

@@ -3,13 +3,20 @@ const storiesListReducer = (state = {isLoading: true}, action) =>
   switch(action.type)
     {
     case 'RELOAD_REQUESTED':
-      return {...state, isLoading: true};
+      return {isLoading: true};
 
     case 'RELOAD_SUCCES':
-      return {...state, isLoading: false, stories: action.payload};
+      return {isLoading: false, stories: action.payload};
+
+    case 'SET_CHART_DATA':
+      return {...state, chartData: action.payload};
 
     case 'RELOAD_FAILED':
-      return {...state, isLoading: false, isError: true};
+      return {isLoading: false, isError: true};
+
+    // case 'UPDATE_COMMENT':
+    //   return state.map(
+    //     (comment, i) => comment.i === action.payload.id ? {...comment} : comment);
 
     default:
       return state;
