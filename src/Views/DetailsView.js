@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { Link, useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -23,8 +23,7 @@ function DetailsView({ match }) {
 
   const stories = useSelector(state => state.storiesList.stories);
   const isLoading = useSelector(state => state.storiesList.isLoading);
-  const dispatch = useDispatch();
-
+  const history = useHistory();
   const [story, setStory] = useState({});
   const [comments, setComments] = useState({});
 
@@ -34,13 +33,19 @@ function DetailsView({ match }) {
     if (!isLoading)
       {
       const currentStory = stories.find(item => item.id == match.params.id);
-      setStory(currentStory);
       
-      if (!currentStory.comments || currentStory.comments.length < 1)
+      if (currentStory)
         {
-        const comments = await fetchStoryComments(currentStory);
-        setComments(comments);
+        setStory(currentStory);
+        
+        if (!currentStory.comments || currentStory.comments.length < 1)
+          {
+          const comments = await fetchStoryComments(currentStory);
+          setComments(comments);
+          }
         }
+      else 
+        history.push('/');
       }
     };
 
@@ -49,7 +54,6 @@ function DetailsView({ match }) {
     const commentsIds = aStory.kids;
 
     let authors = [];
-    // const data = await fetch(mainUrl + topStoriesIdsUrl).then(r => r.json());
     let comments = [];
 
     for (let i = 0; i < 10 && i < commentsIds.length; i++)
@@ -65,16 +69,6 @@ function DetailsView({ match }) {
       const userUrl = `user/${user}.json`;
       const commentAuthorData = await fetch(mainUrl + userUrl).then(r => r.json());
       const userCreations = commentAuthorData.submitted.length;
-
-      // for (let i = 0; i < commentAuthorData.submitted.length; i++)
-      //   {
-      //   const item = commentAuthorData.submitted[i];
-      //   const storyUrl = `item/${item}.json`;
-      //   const userSubmit = fetch(mainUrl + storyUrl).then(r => r.json());
-        
-        // if (userSubmit.type === "comment")
-        //   userComments++;
-        // }
       
       comments.push({
         author: user,
@@ -84,11 +78,8 @@ function DetailsView({ match }) {
         });
       }
     
-    // const stories = await prepareComments(commentsIds);
     return comments;
     }
-
-  
 
   return (
     <div className="DetailsView">

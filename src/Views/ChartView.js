@@ -8,7 +8,6 @@ import Button from '@material-ui/core/Button';
 
 import Chart from 'react-apexcharts';
 
-
 const useStyles = makeStyles(theme => ({
   button: {
     margin: theme.spacing(1),
@@ -22,10 +21,14 @@ function ChartView() {
   const [chartOptions, setOptions] = useState({});
   const classes = useStyles();
   const chartData = useSelector(state => {
-    return [{
+    if (state.storiesList.chartData)
+      return [{
       name: 'Stories score chart',
       data: [...state.storiesList.chartData]
-    }]});
+      }];
+    else
+      return false
+    });
   
   return (
     <div className="Chart">
@@ -41,7 +44,7 @@ function ChartView() {
           width="100%"
           height="200%"
         />:
-        <div>Something wrong with chart data...</div>}
+        <div>Data for graph not yet loaded, please wait ...</div>}
     </div>
   );
 }

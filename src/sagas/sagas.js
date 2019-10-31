@@ -11,7 +11,6 @@ export function* getData()
     
     const scoresSorted = response.map(el => el.score);
     const chartData = randomizeStories(scoresSorted);
-
     yield put(actions.setChartData(chartData));
     }
   catch (e) 
@@ -37,18 +36,18 @@ const fetchTopStories = async () =>
   return stories;
   }
 
-const fetchStoryById = async (aId) => 
+const fetchStoryById = (aId) => 
   {
   const storyIdUrl = `item/${aId}.json`;
-  const story = await fetch(mainUrl + storyIdUrl).then(r => r.json());
+  const story = fetch(mainUrl + storyIdUrl).then(r => r.json());
   return story;
   }
 
-const fetchUserKarma = async (aName) => 
+const fetchUser = (aName) => 
   {
   const userNameUrl = `user/${aName}.json`;
-  const user = await fetch(mainUrl + userNameUrl).then(r => r.json());
-  return user.karma;
+  const user = fetch(mainUrl + userNameUrl).then(r => r.json());
+  return user;
   }
 
 function getRandomIds(aArray, aNumber)
@@ -72,20 +71,61 @@ function getRandomIds(aArray, aNumber)
 
 async function prepareStories(aStoriesIds)
   {
-  let storiesData = [];
+  let storiesFetch = [];
+  let usersFetch = [];
+  let users =[];
 
-  // How to do it whit foreach when its async ?
   for (let i = 0; i < aStoriesIds.length; i++)
     {
-    let story = await fetchStoryById(aStoriesIds[i]);
-    story.karma = await fetchUserKarma(story.by);
-
-    const time = moment(Date(story.time)).format('DD-MM-YYYY HH:mm:ss');
-    story.time = time;
-    storiesData.push(story);
+    let story = fetchStoryById(aStoriesIds[i]);
+    storiesFetch.push(story);
     }
 
+  const storiesData = await Promise.all(storiesFetch);
+
+  storiesData.map((element) => {
+    users.push(element.by);
+    return element;
+    });
+
+  for (let i = 0; i < users.length; i++)
+    {
+    let userData = fetchUser(users[i]);
+    usersFetch.push(userData);
+    }
+
+  const userDetailed = await Promise.all(usersFetch);
+
+  storiesData.map((element) => {
+    const userData = userDetailed.find(item => item.id == element.by);
+    element.karma = userData.karma;
+    const time = moment(Date(element.time)).format('DD-MM-YYYY HH:mm:ss');
+    element.time = time;
+    return element;
+  });
+  
   storiesData.sort((a,b)=>{return b.score - a.score});
+
+  ///// HIGH FETCH NUMBER TESTS
+  // const dmix = 'dmix';
+  // const userDmix = await fetch(mainUrl + `user/${dmix}.json`).then(r => r.json());
+
+  // let commentFetch = [];
+  // const commentsIds = userDmix.submitted;
+
+  // console.log('Comments Ids:', commentsIds); //dmix
+
+  // for (let i = 0; i < commentsIds.length; i++)
+  //   {
+  //   const commentId = commentsIds[i];
+  //   console.log('Comment Id:', commentId);
+  //   const commentUrl = `item/${commentId}.json`;
+  //   const comment = fetch(mainUrl + commentUrl).then(r => r.json());
+  //   commentFetch.push(comment);
+  //   }
+
+  // const comments = await Promise.all(commentFetch);
+  // console.log(comments);
 
   return storiesData;
   }
